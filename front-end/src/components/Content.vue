@@ -1,7 +1,7 @@
 <template>
   <div id="Content">
     <el-dialog
-      title="AI预测中"
+      title="ML model is predicting"
       :visible.sync="dialogTableVisible"
       :show-close="false"
       :close-on-press-escape="false"
@@ -10,7 +10,7 @@
       :center="true"
     >
       <el-progress :percentage="percentage"></el-progress>
-      <span slot="footer" class="dialog-footer">请耐心等待约3秒钟</span>
+      <span slot="footer" class="dialog-footer">please wait for about 3 seconds</span>
     </el-dialog>
 
     <div id="CT">
@@ -20,15 +20,17 @@
           class="box-card"
           style="
             border-radius: 8px;
-            width: 800px;
-            height: 360px;
+            width: 80%;
+            height: 600px;
+            margin-top: 30px;
             margin-bottom: -30px;
+            background-color: #545c64;
           "
         >
           <div class="demo-image__preview1">
             <div
               v-loading="loading"
-              element-loading-text="上传图片中"
+              element-loading-text="uploading"
               element-loading-spinner="el-icon-loading"
             >
               <el-image
@@ -46,7 +48,7 @@
                       class="download_bt"
                       v-on:click="true_upload"
                     >
-                      上传图像
+                      upload video here
                       <input
                         ref="upload"
                         style="display: none"
@@ -60,7 +62,7 @@
               </el-image>
             </div>
             <div class="img_info_1" style="border-radius: 0 0 5px 5px">
-              <span style="color: white; letter-spacing: 6px">原始图像</span>
+              <span style="color: white; letter-spacing: 6px">original video</span>
             </div>
           </div>
           <div class="demo-image__preview2">
@@ -81,25 +83,25 @@
               </el-image>
             </div>
             <div class="img_info_1" style="border-radius: 0 0 5px 5px">
-              <span style="color: white; letter-spacing: 4px">检测结果</span>
+              <span style="color: white; letter-spacing: 4px">predict result</span>
             </div>
           </div>
         </el-card>
       </div>
       <div id="info_patient">
         <!-- 卡片放置表格 -->
-        <el-card style="border-radius: 8px">
+        <el-card style="border-radius: 8px; background-color: #545c64;">
           <div slot="header" class="clearfix">
-            <span>检测目标</span>
+            <div style="color: #21b3b9;">Object Detected Preview</div>
             <el-button
-              style="margin-left: 35px"
+              style="margin-top: 20px"
               v-show="!showbutton"
               type="primary"
               icon="el-icon-upload"
               class="download_bt"
               v-on:click="true_upload2"
             >
-              重新选择图像
+              upload other video
               <input
                 ref="upload2"
                 style="display: none"
@@ -110,7 +112,7 @@
             </el-button>
           </div>
           <el-tabs v-model="activeName">
-            <el-tab-pane label="检测到的目标" name="first">
+            <el-tab-pane label="Object Detected" name="first">
               <!-- 表格存放特征值 -->
               <el-table
                 :data="feature_list"
@@ -122,17 +124,17 @@
                 element-loading-spinner="el-icon-loading"
                 lazy
               >
-                <el-table-column label="目标类别" width="250px">
+                <el-table-column label="class" width="250px">
                   <template slot-scope="scope">
                     <span>{{ scope.row[2] }}</span>
                   </template>
                 </el-table-column>
-                <el-table-column label="目标大小" width="250px">
+                <el-table-column label="size" width="250px">
                   <template slot-scope="scope">
                     <span>{{ scope.row[0] }}</span>
                   </template>
                 </el-table-column>
-                <el-table-column label="置信度" width="250px">
+                <el-table-column label="confidence interval " width="250px">
                   <template slot-scope="scope">
                     <span>{{ scope.row[1] }}</span>
                   </template>
@@ -167,8 +169,8 @@ export default {
       feat_list: [],
       url: "",
       visible: false,
-      wait_return: "等待上传",
-      wait_upload: "等待上传",
+      wait_return: "waiting for uploading",
+      wait_upload: "waiting for uploading",
       loading: false,
       table: false,
       isNav: false,
@@ -182,7 +184,7 @@ export default {
     };
   },
   created: function () {
-    document.title = "YOLOv5目标检测WEB端";
+    document.title = "ML managing platform";
   },
   methods: {
     true_upload() {
@@ -267,8 +269,8 @@ export default {
     drawChart() {},
     notice1() {
       this.$notify({
-        title: "预测成功",
-        message: "点击图片可以查看大图",
+        title: "prediction complete",
+        message: "",
         duration: 0,
         type: "success",
       });
@@ -340,18 +342,15 @@ export default {
 
 #CT {
   display: flex;
-  height: 100%;
-  width: 100%;
   flex-wrap: wrap;
   justify-content: center;
-  margin: 0 auto;
+  margin-top: 0px;
   margin-right: 0px;
-  max-width: 1800px;
 }
 
 #CT_image_1 {
   width: 90%;
-  height: 40%;
+  height: 60%;
   margin: 0px auto;
   padding: 0px auto;
   margin-right: 180px;
@@ -366,15 +365,15 @@ export default {
 }
 
 .image_1 {
-  width: 275px;
-  height: 260px;
+  width: 400px;
+  height: 500px;
   background: #ffffff;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 }
 
 .img_info_1 {
   height: 30px;
-  width: 275px;
+  width: 400px;
   text-align: center;
   background-color: #21b3b9;
   line-height: 30px;
@@ -382,16 +381,17 @@ export default {
 
 .demo-image__preview1 {
   width: 250px;
-  height: 290px;
-  margin: 20px 60px;
+  height: 600px;
+  margin: 20px 130px;
   float: left;
 }
 
 .demo-image__preview2 {
   width: 250px;
-  height: 290px;
+  height: 600px;
 
-  margin: 20px 460px;
+  margin: 20px 660px;
+  margin-right: 430px;
   /* background-color: green; */
 }
 
@@ -400,6 +400,8 @@ export default {
   width: 50%;
   padding: 10px;
   text-align: center;
+  color: #21B3B9;
+  font-size: 25px;
 }
 
 .block-sidebar {
@@ -431,9 +433,9 @@ div {
 }
 
 .download_bt {
-  padding: 10px 16px !important;
+  /* padding: 10px 16px !important; */
+  margin-left: -10px;
 }
-
 #upfile {
   width: 104px;
   height: 45px;
@@ -469,11 +471,11 @@ div {
 }
 
 #Content {
-  width: 85%;
-  height: 800px;
-  background-color: #ffffff;
-  margin: 15px auto;
-  display: flex;
+  /* width: 90%; */
+  /* height: 800px; */
+  /* margin: 15px auto; */
+  /* display: flex; */
+  margin-top: 80px;
   min-width: 1200px;
 }
 

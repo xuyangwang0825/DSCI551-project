@@ -1,28 +1,49 @@
 <template>
   <div id="app">
-    <app-header></app-header>
-    <app-content></app-content>
-    <app-footer></app-footer>
+    <el-container>
+      <el-aside width="360px"><app-sidebar></app-sidebar></el-aside>
+      <el-main>
+        <el-container>
+          <el-header><app-header></app-header></el-header>
+          <app-content></app-content>
+        </el-container>
+      </el-main>
+    </el-container>
   </div>
 </template>
 
 <script>
 import Header from "./components/Header";
-import Footer from "./components/Footer";
 import Content from "./components/Content";
+import Sidebar from "./components/Sidebar";
 export default {
-  name: "眼疾辅助诊断系统",
+  name: "DSCI551-project",
   data() {
     return {};
   },
   components: {
     "app-header": Header,
-    "app-footer": Footer,
     "app-content": Content,
+    "app-sidebar": Sidebar,
   },
   methods: {},
 };
 </script>
 
-<style scope="this api replaced by slot-scope in 2.5.0+">
+<style>
+  .el-header, .el-footer {
+    text-align: center;
+    height: 100px;
+  }
+  
+  .el-aside {
+    background-color: #545c64;
+    color: #333;
+    text-align: center;
+  }
+  
+  .el-main {
+    background-color: #D3DCE6;
+    text-align: center;
+  }
 </style>
