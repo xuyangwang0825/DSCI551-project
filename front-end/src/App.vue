@@ -3,10 +3,8 @@
     <el-container>
       <el-aside width="360px"><app-sidebar></app-sidebar></el-aside>
       <el-main>
-        <el-container>
-          <el-header><app-header></app-header></el-header>
-          <app-content></app-content>
-        </el-container>
+        <el-header><app-header></app-header></el-header>
+        <router-view></router-view>
       </el-main>
     </el-container>
   </div>
@@ -14,7 +12,7 @@
 
 <script>
 import Header from "./components/Header";
-import Content from "./components/Content";
+// import Content from "./components/Content";
 import Sidebar from "./components/Sidebar";
 export default {
   name: "DSCI551-project",
@@ -23,7 +21,7 @@ export default {
   },
   components: {
     "app-header": Header,
-    "app-content": Content,
+    // "app-content": Content,
     "app-sidebar": Sidebar,
   },
   methods: {},

@@ -15,10 +15,11 @@
       </template>
       <el-menu-item-group title="CSV">
         <el-menu-item index="1-1">Explore Data</el-menu-item>
-        <el-menu-item index="1-2">Explore Raw Data</el-menu-item>
       </el-menu-item-group>
       <el-menu-item-group title="Video">
-        <el-menu-item index="1-3">Explore Data</el-menu-item>
+        <el-menu-item index="1-2">
+          <router-link to="/show_video_record" >Explore Data</router-link>
+        </el-menu-item>
       </el-menu-item-group>
     </el-submenu>
     <el-menu-item index="2">

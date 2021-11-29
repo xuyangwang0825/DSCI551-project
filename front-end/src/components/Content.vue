@@ -1,5 +1,5 @@
 <template>
-  <div id="Content">
+  <div id="CSV_content">
     <el-dialog
       title="ML model is predicting"
       :visible.sync="dialogTableVisible"
@@ -68,7 +68,7 @@
           <div class="demo-image__preview2">
             <div
               v-loading="loading"
-              element-loading-text="处理中,请耐心等待"
+              element-loading-text="In processing, please wait with patience"
               element-loading-spinner="el-icon-loading"
             >
               <el-image
@@ -118,15 +118,16 @@
                 :data="feature_list"
                 height="390"
                 border
-                style="width: 750px; text-align: center"
+                style="width: 1000px; text-align: center"
                 v-loading="loading"
-                element-loading-text="数据正在处理中，请耐心等待"
+                element-loading-text="In processing, please wait with patience"
                 element-loading-spinner="el-icon-loading"
                 lazy
+                empty-text="No Data Available"
               >
                 <el-table-column label="class" width="250px">
                   <template slot-scope="scope">
-                    <span>{{ scope.row[2] }}</span>
+                    <span>{{ scope.row[3] }}</span>
                   </template>
                 </el-table-column>
                 <el-table-column label="size" width="250px">
@@ -137,6 +138,11 @@
                 <el-table-column label="confidence interval " width="250px">
                   <template slot-scope="scope">
                     <span>{{ scope.row[1] }}</span>
+                  </template>
+                </el-table-column>
+                <el-table-column label="recommend result" width="250px">
+                  <template slot-scope="scope">
+                    <a :href="'https://www.amazon.com/s?k=' + scope.row[2]">click me!</a>
                   </template>
                 </el-table-column>
               </el-table>
@@ -248,11 +254,11 @@ export default {
           this.feat_list = Object.keys(response.data.image_info);
 
           for (var i = 0; i < this.feat_list.length; i++) {
-            response.data.image_info[this.feat_list[i]][2] = this.feat_list[i];
+            response.data.image_info[this.feat_list[i]][3] = this.feat_list[i];
             this.feature_list.push(response.data.image_info[this.feat_list[i]]);
           }
 
-          this.feature_list.push(response.data.image_info);
+          // this.feature_list.push(response.data.image_info);
           this.feature_list_1 = this.feature_list[0];
           this.dialogTableVisible = false;
           this.percentage = 0;
@@ -260,8 +266,8 @@ export default {
         });
     },
     myFunc() {
-      if (this.percentage + 33 < 99) {
-        this.percentage = this.percentage + 33;
+      if (this.percentage + 9 < 99) {
+        this.percentage = this.percentage + 9;
       } else {
         this.percentage = 99;
       }

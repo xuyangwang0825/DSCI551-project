@@ -6,7 +6,8 @@ from datetime import timedelta
 from flask import *
 from processor.AIDetector_pytorch import Detector
 import boto3, botocore
-from config import S3_KEY, S3_SECRET, S3_BUCKET
+import config
+import MySQLdb
 import core.main
 from werkzeug.utils import secure_filename
 from aws.upload_file_to_s3 import upload_file_to_s3
@@ -70,8 +71,8 @@ def upload_file():
 
         file.save(src_path)
 
-        output = upload_file_to_s3(s3, src_path, file.filename, S3_BUCKET)
-        print(output)
+        video_s3_url = upload_file_to_s3(s3, src_path, file.filename, config.S3_BUCKET)
+
         # get first frame of video
         video_oath = src_path
         src_path = src_path[:-3] + 'jpg'
@@ -80,8 +81,25 @@ def upload_file():
         img_name = file.filename[:-3] + 'jpg'
         shutil.copy(src_path, './tmp/ct')
         image_path = os.path.join('./tmp/ct', img_name)
+        result_path = os.path.join('./tmp/draw', img_name)
         pid, image_info = core.main.c_main(
             image_path, current_app.model, img_name.rsplit('.', 1)[1])
+
+        file_size = str(round(os.path.getsize(video_oath) / float(1024*1024), 2)) + ' mb'
+        # insert record into rds
+        insert_video_info = (
+            "insert into video_info (video_name, video_s3_path, pic_s3_path, result_s3_path, content_type, content_length, mimetype)"
+            "values (%s, %s, %s, %s, %s, %s, %s)"
+        )
+        cursor.execute(insert_video_info, (file.filename, video_s3_url, image_path, result_path, str(file.content_type), file_size, str(file.mimetype)))
+        db.commit()
+
+        for k, v in image_info.items():
+            recommend_url = "www.amazon.com/s?k=" + k.split("-")[0]
+            image_info[k].append(recommend_url)
+
+        # print(image_info)
+
         return jsonify({'status': 1,
                         'image_url': 'http://127.0.0.1:5003/tmp/ct/' + pid,
                         'draw_url': 'http://127.0.0.1:5003/tmp/draw/' + pid,
@@ -89,6 +107,37 @@ def upload_file():
 
     return jsonify({'status': 0})
 
+@app.route("/get_video_info", methods=['GET'])
+def get_video_info():
+    get_video_info = (
+        "select video_name, video_s3_path, content_type, content_length from video_info"
+    )
+    cursor.execute(get_video_info)
+    data = cursor.fetchall()
+
+    return jsonify({'video_info': data})
+
+@app.route("/get_video_result_detail", methods=['GET', 'POST'])
+def get_video_result_detail():
+
+    video_name = request.form.get('video_name')
+    # print(video_name)
+    img_name = video_name[:-3] + 'jpg'
+    image_path = os.path.join('./tmp/ct', img_name)
+    result_path = os.path.join('./tmp/draw', img_name)
+    pid, image_info = core.main.c_main(
+        image_path, current_app.model, img_name.rsplit('.', 1)[1])
+
+    for k, v in image_info.items():
+        recommend_url = "www.amazon.com/s?k=" + k.split("-")[0]
+        image_info[k].append(recommend_url)
+
+    # print(image_info)
+
+    return jsonify({'status': 1,
+                    'image_url': 'http://127.0.0.1:5003/tmp/ct/' + pid,
+                    'draw_url': 'http://127.0.0.1:5003/tmp/draw/' + pid,
+                    'image_info': image_info})
 
 @app.route("/download", methods=['GET'])
 def download_file():
@@ -109,12 +158,26 @@ def show_photo(file):
 
 if __name__ == '__main__':
 
-    #connect to s3
+    # connect to s3
     s3 = boto3.client(
         "s3",
-        aws_access_key_id=S3_KEY,
-        aws_secret_access_key=S3_SECRET
+        aws_access_key_id=config.S3_KEY,
+        aws_secret_access_key=config.S3_SECRET
     )
+
+    # connect to rds
+    db = MySQLdb.connect(host=config.HOST,
+                            port=config.PORT,
+                            user=config.USER,
+                            passwd=config.PASSWD,
+                            db=config.DB,
+                            charset=config.CHARSET)
+
+    cursor = db.cursor()
+
+    # test
+    # cursor.execute("SELECT * FROM video")
+    # print(cursor.fetchone()[0])
 
     files = [
         'uploads', 'tmp/ct', 'tmp/draw',

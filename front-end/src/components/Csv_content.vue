@@ -48,7 +48,7 @@
                       class="download_bt"
                       v-on:click="true_upload"
                     >
-                      upload CSV here
+                      upload csv here
                       <input
                         ref="upload"
                         style="display: none"
@@ -68,7 +68,7 @@
           <div class="demo-image__preview2">
             <div
               v-loading="loading"
-              element-loading-text="处理中,请耐心等待"
+              element-loading-text="In processing, please wait with patience"
               element-loading-spinner="el-icon-loading"
             >
               <el-image
@@ -120,7 +120,7 @@
                 border
                 style="width: 750px; text-align: center"
                 v-loading="loading"
-                element-loading-text="数据正在处理中，请耐心等待"
+                element-loading-text="In processing, please wait with patience"
                 element-loading-spinner="el-icon-loading"
                 lazy
               >

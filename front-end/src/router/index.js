@@ -1,7 +1,9 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router'
-import App from '../App'
-
+import UploadVideo from '../view/UploadVideo'
+import UploadCSV from '../view/UploadCSV'
+import VideoRecord from '../view/VideoRecord'
+import VideoResultDetail from '../view/VideoResultDetail'
 
 VueRouter.prototype.goBack = function () {
   this.isBack = true;
@@ -12,9 +14,25 @@ Vue.use(VueRouter);
 const router = new VueRouter({
     routes: [
         {
-          path: "/home",
-          component: App,
+          path: "/",
+          component: UploadVideo,
         },
+        {
+          path: "/upload_csv",
+          component: UploadCSV,
+        },
+        {
+          path: "/upload_video",
+          component: UploadVideo,
+        },
+        {
+          path: "/show_video_record",
+          component: VideoRecord,
+        },
+        {
+          path: "/video_result_detail",
+          component: VideoResultDetail
+        }
     ],
     mode: "history"
 })

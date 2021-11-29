@@ -1,29 +1,17 @@
 <template>
-  <div id="uv">
-    <el-container>
-      <el-aside width="360px"><app-sidebar></app-sidebar></el-aside>
-      <el-main>
-        <el-container>
-          <el-header><app-header></app-header></el-header>
-          <app-content></app-content>
-        </el-container>
-      </el-main>
-    </el-container>
+  <div id="UploadVideo">
+    <app-content></app-content>
   </div>
 </template>
 
 <script>
-import Header from "../components/Csv_header";
-import Content from "../components/Csv_content";
-import Sidebar from "../components/Sidebar";
+import Content from "../components/Content";
 export default {
   data() {
     return {};
   },
   components: {
-    "app-header": Header,
     "app-content": Content,
-    "app-sidebar": Sidebar,
   },
   methods: {},
 };
@@ -44,5 +32,8 @@ export default {
   .el-main {
     background-color: #D3DCE6;
     text-align: center;
+  }
+  #UploadVideo{
+    margin-top: 50px;
   }
 </style>
