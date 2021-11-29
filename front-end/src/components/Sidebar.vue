@@ -10,20 +10,22 @@
   >
     <el-submenu index="1">
       <template slot="title">
-        <i class="el-icon-location"></i>
+        <i class="el-icon-caret-right"></i>
         <span>Exploring Data</span>
       </template>
-      <el-menu-item index="1-1">Explore CSV Data</el-menu-item>
+      <el-menu-item index="1-1">
+        <router-link to="/json_data_preview" >JSON Data</router-link>
+      </el-menu-item>
       <el-menu-item index="1-2">
-        <router-link to="/show_video_record" >Explore Video Data</router-link>
+        <router-link to="/show_video_record" >Video Data</router-link>
       </el-menu-item>
     </el-submenu>
     <el-menu-item index="2">
-      <i class="el-icon-menu"></i>
-      <router-link to="/upload_csv" >Upload CSV</router-link>
+      <i class="el-icon-folder-add"></i>
+      <router-link to="/upload_csv" >Upload JSON</router-link>
     </el-menu-item>
     <el-menu-item index="3">
-      <i class="el-icon-setting"></i>
+      <i class="el-icon-folder-add"></i>
       <router-link to="/upload_video" >Upload Video</router-link>
     </el-menu-item>
   </el-menu>

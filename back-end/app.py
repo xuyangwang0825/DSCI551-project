@@ -83,13 +83,13 @@ def upload_csv():
         cnt = 0
         for video in videos:
             # print(video)
-            insert_video_info = (
-                "insert into video_csv_detail_info (id, createTime, diggCount, shareCount, playCount, commentCount)"
-                "values (%s, %s, %s, %s, %s, %s)"
-            )
-            # print(int(video["id"]), int(video["createTime"]), int(video["diggCount"]), int(video["shareCount"]), int(video["playCount"]), int(video["commentCount"]))
-            cursor.execute(insert_video_info, (int(video["id"]), int(video["createTime"]), int(video["diggCount"]), int(video["shareCount"]), int(video["playCount"]), int(video["commentCount"])))
-            db.commit()
+            # insert_video_info = (
+            #     "insert into video_csv_detail_info (id, createTime, diggCount, shareCount, playCount, commentCount)"
+            #     "values (%s, %s, %s, %s, %s, %s)"
+            # )
+            # # print(int(video["id"]), int(video["createTime"]), int(video["diggCount"]), int(video["shareCount"]), int(video["playCount"]), int(video["commentCount"]))
+            # cursor.execute(insert_video_info, (int(video["id"]), int(video["createTime"]), int(video["diggCount"]), int(video["shareCount"]), int(video["playCount"]), int(video["commentCount"])))
+            # db.commit()
             cnt += 1
             v = [int(video["id"]), int(video["createTime"]), int(video["diggCount"]), int(video["shareCount"]), int(video["playCount"]), int(video["commentCount"])]
             video_info[int(video["id"])] = v
@@ -198,6 +198,41 @@ def get_video_result_detail():
                     'image_url': 'http://127.0.0.1:5003/tmp/ct/' + pid,
                     'draw_url': 'http://127.0.0.1:5003/tmp/draw/' + pid,
                     'image_info': image_info})
+
+@app.route("/get_json_detail", methods=['GET', 'POST'])
+def get_json_detail():
+
+    # metadata
+    filename = 'trending.json'
+    src_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    json_s3_url = "{}{}".format(config.S3_LOCATION, filename)
+    file_size = str(round(os.path.getsize(src_path) / float(1024*1024), 2)) + ' mb'
+
+    videos = mycol.find({}, ["id", "createTime", "diggCount", "shareCount", "playCount", "commentCount"])
+
+    video_info = {}
+    cnt = 0
+    for video in videos:
+        # print(video)
+        # insert_video_info = (
+        #     "insert into video_csv_detail_info (id, createTime, diggCount, shareCount, playCount, commentCount)"
+        #     "values (%s, %s, %s, %s, %s, %s)"
+        # )
+        # # print(int(video["id"]), int(video["createTime"]), int(video["diggCount"]), int(video["shareCount"]), int(video["playCount"]), int(video["commentCount"]))
+        # cursor.execute(insert_video_info, (int(video["id"]), int(video["createTime"]), int(video["diggCount"]), int(video["shareCount"]), int(video["playCount"]), int(video["commentCount"])))
+        # db.commit()
+        # cnt += 1
+        v = [int(video["id"]), int(video["createTime"]), int(video["diggCount"]), int(video["shareCount"]), int(video["playCount"]), int(video["commentCount"])]
+        video_info[int(video["id"])] = v
+        if cnt > 50:
+            break
+
+    # print(video_info)
+
+    return jsonify({'file_name': filename,
+                    'json_s3_url': json_s3_url,
+                    'file_size': file_size,
+                    'video_info': video_info})
 
 @app.route("/download", methods=['GET'])
 def download_file():

@@ -1,7 +1,7 @@
 <template>
-  <div id="Video_result_detail">
+  <div id="JSON_data_preview">
     <!-- <el-dialog
-      title="ML model is predicting"
+      title="data is processing"
       :visible.sync="dialogTableVisible"
       :show-close="false"
       :close-on-press-escape="false"
@@ -14,98 +14,79 @@
     </el-dialog> -->
 
     <div id="CT">
-      <div id="CT_image">
-        <el-card
-          id="CT_image_1"
-          class="box-card"
-          style="
-            border-radius: 8px;
-            width: 80%;
-            height: 600px;
-            margin-top: 30px;
-            margin-bottom: -30px;
-            background-color: #545c64;
-          "
-        >
-          <div class="demo-image__preview1">
-            <div
-              v-loading="loading"
-              element-loading-text="uploading"
-              element-loading-spinner="el-icon-loading"
-            >
-              <el-image
-                :src="url_1"
-                class="image_1"
-                :preview-src-list="srcList"
-                style="border-radius: 3px 3px 0 0"
-              >
-              </el-image>
-            </div>
-            <div class="img_info_1" style="border-radius: 0 0 5px 5px">
-              <span style="color: white; letter-spacing: 6px">original video</span>
-            </div>
-          </div>
-          <div class="demo-image__preview2">
-            <div
-              v-loading="loading"
-              element-loading-text="In processing, please wait with patience"
-              element-loading-spinner="el-icon-loading"
-            >
-              <el-image
-                :src="url_2"
-                class="image_1"
-                :preview-src-list="srcList1"
-                style="border-radius: 3px 3px 0 0"
-              >
-                <div slot="error">
-                  <div slot="placeholder" class="error">{{ wait_return }}</div>
-                </div>
-              </el-image>
-            </div>
-            <div class="img_info_1" style="border-radius: 0 0 5px 5px">
-              <span style="color: white; letter-spacing: 4px">predict result</span>
-            </div>
-          </div>
-        </el-card>
-      </div>
       <div id="info_patient">
         <!-- 卡片放置表格 -->
         <el-card style="border-radius: 8px; background-color: #545c64;">
-          <div slot="header" class="clearfix">
-            <div style="color: #21b3b9;">Object Detected Preview</div>
-          </div>
           <el-tabs v-model="activeName">
-            <el-tab-pane label="Object Detected" name="first">
+            <el-tab-pane label="metadata" name="first">
               <!-- 表格存放特征值 -->
               <el-table
-                :data="feature_list"
-                height="390"
+                :data = meta_list
+                height="150"
                 border
-                style="width: 1000px; text-align: center"
+                style="width: 700px; text-align: center"
                 v-loading="loading"
                 element-loading-text="In processing, please wait with patience"
                 element-loading-spinner="el-icon-loading"
                 lazy
                 empty-text="No Data Available"
               >
-                <el-table-column label="class" width="250px">
-                  <template slot-scope="scope">
-                    <span>{{ scope.row[3] }}</span>
-                  </template>
+                <el-table-column label="file name" width="150px">
+                  <span>{{this.file_name}}</span>
                 </el-table-column>
-                <el-table-column label="size" width="250px">
+                <el-table-column label="file size" width="150px">
+                  <span>{{this.file_size}}</span>
+                </el-table-column>
+                <el-table-column label="json s3 url" width="500px">
+                  <span>{{this.json_s3_url}}</span>
+                </el-table-column>
+              </el-table>
+            </el-tab-pane>
+          </el-tabs>
+        </el-card>
+        <el-card style="border-radius: 8px; background-color: #545c64;">
+          <el-tabs v-model="activeName">
+            <el-tab-pane label="JSON Preview" name="first">
+              <!-- 表格存放特征值 -->
+              <el-table
+                :data="feature_list"
+                height="390"
+                border
+                style="width: 950px; text-align: center"
+                v-loading="loading"
+                element-loading-text="In processing, please wait with patience"
+                element-loading-spinner="el-icon-loading"
+                lazy
+                empty-text="No Data Available"
+              >
+                <el-table-column label="video_name" width="200px">
                   <template slot-scope="scope">
                     <span>{{ scope.row[0] }}</span>
                   </template>
                 </el-table-column>
-                <el-table-column label="confidence interval " width="250px">
+                <el-table-column label="createTime" width="150px">
                   <template slot-scope="scope">
                     <span>{{ scope.row[1] }}</span>
                   </template>
                 </el-table-column>
-                <el-table-column label="recommend result" width="250px">
+                <el-table-column label="diggCount" width="150px">
                   <template slot-scope="scope">
-                    <a :href="'https://www.amazon.com/s?k=' + scope.row[2]">click me!</a>
+                    <span>{{ scope.row[2] }}</span>
+                  </template>
+                </el-table-column>
+                <el-table-column label="shareCount" width="150px">
+                  <template slot-scope="scope">
+                    <span>{{ scope.row[3] }}</span>
+                  </template>
+                </el-table-column>
+                <el-table-column label="playCount" width="150px">
+                  <template slot-scope="scope">
+                    <span>{{ scope.row[4] }}</span>
+                  </template>
+                </el-table-column>
+                <el-table-column label="commentCount" width="150px">
+                  <template slot-scope="scope">
+                    <span>{{ scope.row[5] }}</span>
                   </template>
                 </el-table-column>
               </el-table>
@@ -119,7 +100,7 @@
 
 <script>
 import axios from "axios";
-import qs from 'qs'
+
 export default {
   name: "Content",
   data() {
@@ -177,56 +158,49 @@ export default {
       }
       return url;
     },
-    get_video_result_detail() {
-      this.video_name = this.$route.query.id;
+    // 上传文件
+    get_json_detail() {
       this.percentage = 0;
       this.dialogTableVisible = true;
-      this.url_1 = "";
-      this.url_2 = "";
-      this.srcList = [];
-      this.srcList1 = [];
       this.wait_return = "";
       this.wait_upload = "";
+      this.file_name = "";
+      this.json_s3_url = "";
+      this.file_size = "";
       this.feature_list = [];
+      this.meta_list = [];
       this.feat_list = [];
       this.fullscreenLoading = true;
       this.loading = true;
       this.showbutton = false;
-      let postData = qs.stringify({
-        "video_name": this.video_name,
-      });
       var timer = setInterval(() => {
         this.myFunc();
       }, 30);
       axios
-        .post(this.server_url + "/get_video_result_detail", postData)
+        .get(this.server_url + "/get_json_detail")
         .then((response) => {
           this.percentage = 100;
           clearInterval(timer);
-          this.url_1 = response.data.image_url;
-          this.srcList.push(this.url_1);
-          this.url_2 = response.data.draw_url;
-          this.srcList1.push(this.url_2);
           this.fullscreenLoading = false;
           this.loading = false;
 
-          this.feat_list = Object.keys(response.data.image_info);
+          this.feat_list = Object.keys(response.data.video_info);
 
           for (var i = 0; i < this.feat_list.length; i++) {
-            response.data.image_info[this.feat_list[i]][3] = this.feat_list[i];
-            this.feature_list.push(response.data.image_info[this.feat_list[i]]);
+            this.feature_list.push(response.data.video_info[this.feat_list[i]]);
           }
-
-          // this.feature_list.push(response.data.image_info);
-          this.feature_list_1 = this.feature_list[0];
+          this.file_name = response.data.file_name
+          this.json_s3_url = response.data.json_s3_url
+          this.file_size = response.data.file_size
+          this.meta_list.push(response.data.file_name)
           this.dialogTableVisible = false;
           this.percentage = 0;
           this.notice1();
         });
     },
     myFunc() {
-      if (this.percentage + 9 < 99) {
-        this.percentage = this.percentage + 9;
+      if (this.percentage + 33 < 99) {
+        this.percentage = this.percentage + 33;
       } else {
         this.percentage = 99;
       }
@@ -234,7 +208,7 @@ export default {
     drawChart() {},
     notice1() {
       this.$notify({
-        title: "load detection result",
+        title: "load json data complete",
         message: "",
         duration: 0,
         type: "success",
@@ -242,7 +216,7 @@ export default {
     },
   },
   mounted() {
-    this.get_video_result_detail();
+    this.get_json_detail();
     this.drawChart();
   },
 };
@@ -436,12 +410,12 @@ div {
   margin: 0px 0px;
 }
 
-#Video_result_detail {
+#Content {
   /* width: 90%; */
   /* height: 800px; */
   /* margin: 15px auto; */
   /* display: flex; */
-  margin-top: 50px;
+  margin-top: 80px;
   min-width: 1200px;
 }
 

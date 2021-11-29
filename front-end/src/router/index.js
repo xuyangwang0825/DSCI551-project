@@ -4,6 +4,7 @@ import UploadVideo from '../view/UploadVideo'
 import UploadCSV from '../view/UploadCSV'
 import VideoRecord from '../view/VideoRecord'
 import VideoResultDetail from '../view/VideoResultDetail'
+import JSONDataPreview from '../view/JSONDataPreview'
 
 VueRouter.prototype.goBack = function () {
   this.isBack = true;
@@ -32,6 +33,10 @@ const router = new VueRouter({
         {
           path: "/video_result_detail",
           component: VideoResultDetail
+        },
+        {
+          path: "/json_data_preview",
+          component: JSONDataPreview
         }
     ],
     mode: "history"
