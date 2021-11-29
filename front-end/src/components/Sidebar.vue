@@ -4,23 +4,19 @@
     class="el-menu-vertical-demo"
     @open="handleOpen"
     @close="handleClose"
-    background-color="#545c64"
-    text-color="#fff"
-    active-text-color="#ffd04b"
+    background-color="#ffffff"
+    text-color="#40707a"
+    active-text-color="#40707a"
   >
     <el-submenu index="1">
       <template slot="title">
         <i class="el-icon-location"></i>
         <span>Exploring Data</span>
       </template>
-      <el-menu-item-group title="CSV">
-        <el-menu-item index="1-1">Explore Data</el-menu-item>
-      </el-menu-item-group>
-      <el-menu-item-group title="Video">
-        <el-menu-item index="1-2">
-          <router-link to="/show_video_record" >Explore Data</router-link>
-        </el-menu-item>
-      </el-menu-item-group>
+      <el-menu-item index="1-1">Explore CSV Data</el-menu-item>
+      <el-menu-item index="1-2">
+        <router-link to="/show_video_record" >Explore Video Data</router-link>
+      </el-menu-item>
     </el-submenu>
     <el-menu-item index="2">
       <i class="el-icon-menu"></i>
@@ -45,3 +41,13 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.router-link-active {
+  color: #40707a;
+}
+a {
+  text-decoration: none;
+  color: #40707a;
+}
+</style>

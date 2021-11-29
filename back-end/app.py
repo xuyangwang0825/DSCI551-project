@@ -9,6 +9,7 @@ import boto3, botocore
 import config
 import MySQLdb
 import core.main
+import pymongo
 from werkzeug.utils import secure_filename
 from aws.upload_file_to_s3 import upload_file_to_s3
 from utils.video2frame import get_first_frame
@@ -44,6 +45,65 @@ def allowed_file(filename):
 @app.route('/')
 def hello_world():
     return redirect(url_for('static', filename='./index.html'))
+
+@app.route("/upload_csv", methods=['GET', "POST"])
+def upload_csv():
+
+    # B
+    file = request.files["file"]
+    # print(file.filename)
+    """
+        These attributes are also available
+        file.filename               # The actual name of the file
+        file.content_type
+        file.content_length
+        file.mimetype
+    """
+    # C.
+    if file.filename == "":
+        return "Please select a file"
+
+    # D.
+    if file and '.' in file.filename and file.filename.rsplit('.', 1)[1] == 'json':
+        file.filename = secure_filename(file.filename)
+
+        # upload video to s3
+        src_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+
+        file.save(src_path)
+
+        # metadata
+        file_name = file.filename
+        json_s3_url = upload_file_to_s3(s3, src_path, file.filename, config.S3_BUCKET)
+        file_size = str(round(os.path.getsize(src_path) / float(1024*1024), 2)) + ' mb'
+
+        videos = mycol.find({}, ["id", "createTime", "diggCount", "shareCount", "playCount", "commentCount"])
+
+        video_info = {}
+        cnt = 0
+        for video in videos:
+            # print(video)
+            insert_video_info = (
+                "insert into video_csv_detail_info (id, createTime, diggCount, shareCount, playCount, commentCount)"
+                "values (%s, %s, %s, %s, %s, %s)"
+            )
+            # print(int(video["id"]), int(video["createTime"]), int(video["diggCount"]), int(video["shareCount"]), int(video["playCount"]), int(video["commentCount"]))
+            cursor.execute(insert_video_info, (int(video["id"]), int(video["createTime"]), int(video["diggCount"]), int(video["shareCount"]), int(video["playCount"]), int(video["commentCount"])))
+            db.commit()
+            cnt += 1
+            v = [int(video["id"]), int(video["createTime"]), int(video["diggCount"]), int(video["shareCount"]), int(video["playCount"]), int(video["commentCount"])]
+            video_info[int(video["id"])] = v
+            if cnt > 50:
+                break
+
+        # print(video_info)
+
+        return jsonify({'file_name': file_name,
+                        'json_s3_url': json_s3_url,
+                        'file_size': file_size,
+                        'video_info': video_info})
+
+    return jsonify({'status': 0})
 
 @app.route("/upload", methods=['GET', "POST"])
 def upload_file():
@@ -164,6 +224,11 @@ if __name__ == '__main__':
         aws_access_key_id=config.S3_KEY,
         aws_secret_access_key=config.S3_SECRET
     )
+
+    # connect to MongoDB / AWS DocumentsDB
+    myclient = pymongo.MongoClient(config.MONGO_HOST)
+    mydb = myclient[config.MONGO_DB]
+    mycol = mydb[config.MONGO_COL]
 
     # connect to rds
     db = MySQLdb.connect(host=config.HOST,

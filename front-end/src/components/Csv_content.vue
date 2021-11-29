@@ -1,7 +1,7 @@
 <template>
   <div id="CSV_content">
     <el-dialog
-      title="ML model is predicting"
+      title="data is processing"
       :visible.sync="dialogTableVisible"
       :show-close="false"
       :close-on-press-escape="false"
@@ -14,129 +14,69 @@
     </el-dialog>
 
     <div id="CT">
-      <div id="CT_image">
-        <el-card
-          id="CT_image_1"
-          class="box-card"
-          style="
-            border-radius: 8px;
-            width: 80%;
-            height: 600px;
-            margin-top: 30px;
-            margin-bottom: -30px;
-            background-color: #545c64;
-          "
-        >
-          <div class="demo-image__preview1">
-            <div
-              v-loading="loading"
-              element-loading-text="uploading"
-              element-loading-spinner="el-icon-loading"
-            >
-              <el-image
-                :src="url_1"
-                class="image_1"
-                :preview-src-list="srcList"
-                style="border-radius: 3px 3px 0 0"
-              >
-                <div slot="error">
-                  <div slot="placeholder" class="error">
-                    <el-button
-                      v-show="showbutton"
-                      type="primary"
-                      icon="el-icon-upload"
-                      class="download_bt"
-                      v-on:click="true_upload"
-                    >
-                      upload csv here
-                      <input
-                        ref="upload"
-                        style="display: none"
-                        name="file"
-                        type="file"
-                        @change="update"
-                      />
-                    </el-button>
-                  </div>
-                </div>
-              </el-image>
-            </div>
-            <div class="img_info_1" style="border-radius: 0 0 5px 5px">
-              <span style="color: white; letter-spacing: 6px">original video</span>
-            </div>
-          </div>
-          <div class="demo-image__preview2">
-            <div
-              v-loading="loading"
-              element-loading-text="In processing, please wait with patience"
-              element-loading-spinner="el-icon-loading"
-            >
-              <el-image
-                :src="url_2"
-                class="image_1"
-                :preview-src-list="srcList1"
-                style="border-radius: 3px 3px 0 0"
-              >
-                <div slot="error">
-                  <div slot="placeholder" class="error">{{ wait_return }}</div>
-                </div>
-              </el-image>
-            </div>
-            <div class="img_info_1" style="border-radius: 0 0 5px 5px">
-              <span style="color: white; letter-spacing: 4px">predict result</span>
-            </div>
-          </div>
-        </el-card>
-      </div>
       <div id="info_patient">
         <!-- 卡片放置表格 -->
         <el-card style="border-radius: 8px; background-color: #545c64;">
           <div slot="header" class="clearfix">
-            <div style="color: #21b3b9;">Object Detected Preview</div>
-            <el-button
-              style="margin-top: 20px"
-              v-show="!showbutton"
-              type="primary"
-              icon="el-icon-upload"
-              class="download_bt"
-              v-on:click="true_upload2"
-            >
-              upload other video
-              <input
-                ref="upload2"
-                style="display: none"
-                name="file"
-                type="file"
-                @change="update"
-              />
-            </el-button>
+              <el-button
+                v-show="showbutton"
+                type="primary"
+                icon="el-icon-upload"
+                class="download_bt"
+                v-on:click="true_upload"
+              >
+                upload csv here
+                <input
+                  ref="upload"
+                  style="display: none"
+                  name="file"
+                  type="file"
+                  @change="update"
+                />
+              </el-button>
           </div>
           <el-tabs v-model="activeName">
-            <el-tab-pane label="Object Detected" name="first">
+            <el-tab-pane label="CSV Preview" name="first">
               <!-- 表格存放特征值 -->
               <el-table
                 :data="feature_list"
                 height="390"
                 border
-                style="width: 750px; text-align: center"
+                style="width: 950px; text-align: center"
                 v-loading="loading"
                 element-loading-text="In processing, please wait with patience"
                 element-loading-spinner="el-icon-loading"
                 lazy
+                empty-text="No Data Available"
               >
-                <el-table-column label="class" width="250px">
-                  <template slot-scope="scope">
-                    <span>{{ scope.row[2] }}</span>
-                  </template>
-                </el-table-column>
-                <el-table-column label="size" width="250px">
+                <el-table-column label="video_name" width="200px">
                   <template slot-scope="scope">
                     <span>{{ scope.row[0] }}</span>
                   </template>
                 </el-table-column>
-                <el-table-column label="confidence interval " width="250px">
+                <el-table-column label="createTime" width="150px">
                   <template slot-scope="scope">
                     <span>{{ scope.row[1] }}</span>
+                  </template>
+                </el-table-column>
+                <el-table-column label="diggCount" width="150px">
+                  <template slot-scope="scope">
+                    <span>{{ scope.row[2] }}</span>
+                  </template>
+                </el-table-column>
+                <el-table-column label="shareCount" width="150px">
+                  <template slot-scope="scope">
+                    <span>{{ scope.row[3] }}</span>
+                  </template>
+                </el-table-column>
+                <el-table-column label="playCount" width="150px">
+                  <template slot-scope="scope">
+                    <span>{{ scope.row[4] }}</span>
+                  </template>
+                </el-table-column>
+                <el-table-column label="commentCount" width="150px">
+                  <template slot-scope="scope">
+                    <span>{{ scope.row[5] }}</span>
                   </template>
                 </el-table-column>
               </el-table>
@@ -212,10 +152,6 @@ export default {
     update(e) {
       this.percentage = 0;
       this.dialogTableVisible = true;
-      this.url_1 = "";
-      this.url_2 = "";
-      this.srcList = [];
-      this.srcList1 = [];
       this.wait_return = "";
       this.wait_upload = "";
       this.feature_list = [];
@@ -234,26 +170,18 @@ export default {
         headers: { "Content-Type": "multipart/form-data" },
       }; //添加请求头
       axios
-        .post(this.server_url + "/upload", param, config)
+        .post(this.server_url + "/upload_csv", param, config)
         .then((response) => {
           this.percentage = 100;
           clearInterval(timer);
-          this.url_1 = response.data.image_url;
-          this.srcList.push(this.url_1);
-          this.url_2 = response.data.draw_url;
-          this.srcList1.push(this.url_2);
           this.fullscreenLoading = false;
           this.loading = false;
 
-          this.feat_list = Object.keys(response.data.image_info);
+          this.feat_list = Object.keys(response.data.video_info);
 
           for (var i = 0; i < this.feat_list.length; i++) {
-            response.data.image_info[this.feat_list[i]][2] = this.feat_list[i];
-            this.feature_list.push(response.data.image_info[this.feat_list[i]]);
+            this.feature_list.push(response.data.video_info[this.feat_list[i]]);
           }
-
-          this.feature_list.push(response.data.image_info);
-          this.feature_list_1 = this.feature_list[0];
           this.dialogTableVisible = false;
           this.percentage = 0;
           this.notice1();
