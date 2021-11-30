@@ -13,6 +13,7 @@ import pymongo
 from werkzeug.utils import secure_filename
 from aws.upload_file_to_s3 import upload_file_to_s3
 from utils.video2frame import get_first_frame
+import pyspark as spark
 
 UPLOAD_FOLDER = r'./uploads'
 
@@ -78,6 +79,10 @@ def upload_csv():
         file_size = str(round(os.path.getsize(src_path) / float(1024*1024), 2)) + ' mb'
 
         videos = mycol.find({}, ["id", "createTime", "diggCount", "shareCount", "playCount", "commentCount"])
+
+        # spark version
+        # videos = spark.read.json('./uploads/trending.json')
+        # videos = video_info[["id", "createTime", "diggCount", "shareCount", "playCount", "commentCount"]]
 
         video_info = {}
         cnt = 0
@@ -209,6 +214,11 @@ def get_json_detail():
     file_size = str(round(os.path.getsize(src_path) / float(1024*1024), 2)) + ' mb'
 
     videos = mycol.find({}, ["id", "createTime", "diggCount", "shareCount", "playCount", "commentCount"])
+
+    # spark version
+    # videos = spark.read.json('./uploads/trending.json')
+    # videos = video_info[["id", "createTime", "diggCount", "shareCount", "playCount", "commentCount"]]
+
 
     video_info = {}
     cnt = 0
