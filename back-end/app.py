@@ -280,8 +280,6 @@ def get_json_detail():
         # cnt += 1
         v = [int(video["id"]), int(video["createTime"]), int(video["diggCount"]), int(video["shareCount"]), int(video["playCount"]), int(video["commentCount"])]
         video_info[int(video["id"])] = v
-        if cnt > 50:
-            break
 
     # print(video_info)
 
