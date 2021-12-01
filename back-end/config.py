@@ -8,7 +8,7 @@ S3_BUCKET = "tiktok-video-dsci551"
 S3_LOCATION = "http://tiktok-video-dsci551.s3.amazonaws.com/"
 
 # RDS MySQL
-HOST = "127.0.0.1"
+HOST = "127.0.0.1"  # database-1.cluster-cnaofc3efg75.us-east-2.rds.amazonaws.com
 PORT = 3306
 USER = "root"
 PASSWD = "123456"

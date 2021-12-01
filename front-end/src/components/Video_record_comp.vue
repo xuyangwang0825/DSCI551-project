@@ -29,7 +29,7 @@
                 :data="video_info_list"
                 height="600"
                 border
-                style="width: 1200px; text-align: center"
+                style="width: 1450px; text-align: center"
                 v-loading="loading"
                 element-loading-text="In processing, please wait with patience"
                 element-loading-spinner="el-icon-loading"
@@ -61,6 +61,11 @@
                 <el-table-column label="s3-path" width="400px">
                   <template slot-scope="scope">
                     <span>{{ scope.row[1] }}</span>
+                  </template>
+                </el-table-column>
+                <el-table-column label="recommend_video_name" width="200px">
+                  <template slot-scope="scope">
+                    <span>{{ scope.row[4] }}</span>
                   </template>
                 </el-table-column>
               </el-table>

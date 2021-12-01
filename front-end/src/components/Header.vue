@@ -26,12 +26,12 @@ h1 {
 }
 #header {
   background-color: #545c64;
-  margin-left: 110px;
-  min-width: 1200px;
-  border-radius: 8px;
+  margin-left: 100px;
+  min-width: 1300px;
+  /* border-radius: 8px; */
   display: flex;
   flex-wrap: wrap;
-  width: 80%;
+  width: 90%;
   justify-content: center;
 }
 </style>

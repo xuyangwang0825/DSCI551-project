@@ -4,6 +4,7 @@ import os
 import shutil
 from datetime import timedelta
 from flask import *
+from pymongo import database
 from processor.AIDetector_pytorch import Detector
 import boto3, botocore
 import config
@@ -14,6 +15,26 @@ from werkzeug.utils import secure_filename
 from aws.upload_file_to_s3 import upload_file_to_s3
 from utils.video2frame import get_first_frame
 import pyspark as spark
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.model_selection import GridSearchCV, KFold, StratifiedKFold
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.metrics import confusion_matrix, auc, roc_curve, classification_report
+from sklearn.svm import SVC
+from sklearn.svm import LinearSVC
+from sklearn.cluster import KMeans, SpectralClustering
+from sklearn.neighbors import KNeighborsClassifier
+from scipy.special import softmax
+from sklearn.model_selection import KFold
+from imblearn.over_sampling import SMOTE
+import joblib
+import random
+
+import warnings
+warnings.filterwarnings("ignore")
 
 UPLOAD_FOLDER = r'./uploads'
 
@@ -27,7 +48,6 @@ werkzeug_logger.setLevel(rel_log.ERROR)
 
 # 解决缓存刷新问题
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = timedelta(seconds=1)
-
 
 # 添加header解决跨域
 @app.after_request
@@ -85,23 +105,40 @@ def upload_csv():
         # videos = video_info[["id", "createTime", "diggCount", "shareCount", "playCount", "commentCount"]]
 
         video_info = {}
-        cnt = 0
-        for video in videos:
+        video_pd = []
+        for i, video in enumerate(videos):
             # print(video)
-            # insert_video_info = (
-            #     "insert into video_csv_detail_info (id, createTime, diggCount, shareCount, playCount, commentCount)"
-            #     "values (%s, %s, %s, %s, %s, %s)"
-            # )
-            # # print(int(video["id"]), int(video["createTime"]), int(video["diggCount"]), int(video["shareCount"]), int(video["playCount"]), int(video["commentCount"]))
-            # cursor.execute(insert_video_info, (int(video["id"]), int(video["createTime"]), int(video["diggCount"]), int(video["shareCount"]), int(video["playCount"]), int(video["commentCount"])))
-            # db.commit()
-            cnt += 1
-            v = [int(video["id"]), int(video["createTime"]), int(video["diggCount"]), int(video["shareCount"]), int(video["playCount"]), int(video["commentCount"])]
+            group_id = random.randint(0,5)
+            insert_video_info = (
+                "insert into video_csv_detail_info (id, createTime, diggCount, shareCount, playCount, commentCount, group_id)"
+                "values (%s, %s, %s, %s, %s, %s, %s)"
+            )
+            # print(int(video["id"]), int(video["createTime"]), int(video["diggCount"]), int(video["shareCount"]), int(video["playCount"]), int(video["commentCount"]))
+            cursor.execute(insert_video_info, (int(video["id"]), int(video["createTime"]), int(video["diggCount"]), int(video["shareCount"]), int(video["playCount"]), int(video["commentCount"]), group_id))
+            db.commit()
+            v = [int(video["id"]), int(video["createTime"]), int(video["diggCount"]), int(video["shareCount"]), int(video["playCount"]), int(video["commentCount"]), group_id]
             video_info[int(video["id"])] = v
-            if cnt > 50:
-                break
+            video_pd.append(v)
 
-        # print(video_info)
+        # using kmeans to cluster
+        video_pd = pd.DataFrame(video_pd)
+        name = file.filename.split('.')[0]
+        video_pd.columns = ['id', 'createTime', 'diggCount', 'hareCount', 'playCount', 'commentCount', 'group_id']
+        video_pd.to_csv(f'./uploads/{name}.csv')
+        # print(video_pd)
+
+        # train
+        # data = pd.read_csv(f'./uploads/{name}.csv')
+        # train_data_x, test_data_x = train_test_split(data, test_size=0.2)
+        # scaler = MinMaxScaler()
+        # norm_train_data_x, norm_test_data_x = scaler.fit_transform(train_data_x), scaler.transform(test_data_x)
+
+        # # create k-means clusters
+        # kmeans = KMeans(n_clusters=2, random_state=1).fit(norm_train_data_x)
+        # joblib.dump(kmeans, 'filename.pkl')
+
+        # clf = joblib.load('./models/kmeans.pkl')
+        # labels_pred = clf.predict([v])
 
         return jsonify({'file_name': file_name,
                         'json_s3_url': json_s3_url,
@@ -151,12 +188,21 @@ def upload_file():
             image_path, current_app.model, img_name.rsplit('.', 1)[1])
 
         file_size = str(round(os.path.getsize(video_oath) / float(1024*1024), 2)) + ' mb'
+
+        # get the recommend video id
+        cursor.execute("select group_id from video_csv_detail_info where id = %s" % (file.filename[:-3]))
+        id_1 = cursor.fetchone()
+        cursor.execute("select id from video_csv_detail_info where group_id = %s and id != %s limit 1" % (id_1[0], file.filename[:-3]))
+        video_name = cursor.fetchone()
+
+        # generate timestamp
+        now_time = datetime.datetime.now()
         # insert record into rds
         insert_video_info = (
-            "insert into video_info (video_name, video_s3_path, pic_s3_path, result_s3_path, content_type, content_length, mimetype)"
-            "values (%s, %s, %s, %s, %s, %s, %s)"
+            "insert into video_info (video_name, video_s3_path, pic_s3_path, result_s3_path, content_type, content_length, mimetype, recommend_video_name, upload_time)"
+            "values (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
         )
-        cursor.execute(insert_video_info, (file.filename, video_s3_url, image_path, result_path, str(file.content_type), file_size, str(file.mimetype)))
+        cursor.execute(insert_video_info, (file.filename, video_s3_url, image_path, result_path, str(file.content_type), file_size, str(file.mimetype), video_name, now_time))
         db.commit()
 
         for k, v in image_info.items():
@@ -175,7 +221,7 @@ def upload_file():
 @app.route("/get_video_info", methods=['GET'])
 def get_video_info():
     get_video_info = (
-        "select video_name, video_s3_path, content_type, content_length from video_info"
+        "select video_name, video_s3_path, content_type, content_length, recommend_video_name from video_info order by upload_time DESC"
     )
     cursor.execute(get_video_info)
     data = cursor.fetchall()

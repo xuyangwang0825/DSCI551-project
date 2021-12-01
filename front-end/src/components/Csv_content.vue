@@ -25,7 +25,7 @@
                 class="download_bt"
                 v-on:click="true_upload"
               >
-                upload csv here
+                upload json here
                 <input
                   ref="upload"
                   style="display: none"
@@ -36,13 +36,13 @@
               </el-button>
           </div>
           <el-tabs v-model="activeName">
-            <el-tab-pane label="CSV Preview" name="first">
+            <el-tab-pane label="JSON Preview" name="first">
               <!-- 表格存放特征值 -->
               <el-table
                 :data="feature_list"
                 height="390"
                 border
-                style="width: 950px; text-align: center"
+                style="width: 1100px; text-align: center"
                 v-loading="loading"
                 element-loading-text="In processing, please wait with patience"
                 element-loading-spinner="el-icon-loading"
@@ -77,6 +77,11 @@
                 <el-table-column label="commentCount" width="150px">
                   <template slot-scope="scope">
                     <span>{{ scope.row[5] }}</span>
+                  </template>
+                </el-table-column>
+                <el-table-column label="group" width="150px">
+                  <template slot-scope="scope">
+                    <span>{{ scope.row[6] }}</span>
                   </template>
                 </el-table-column>
               </el-table>

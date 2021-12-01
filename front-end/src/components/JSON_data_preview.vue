@@ -24,7 +24,7 @@
                 :data = meta_list
                 height="150"
                 border
-                style="width: 700px; text-align: center"
+                style="width: 802px; text-align: center"
                 v-loading="loading"
                 element-loading-text="In processing, please wait with patience"
                 element-loading-spinner="el-icon-loading"
@@ -52,7 +52,7 @@
                 :data="feature_list"
                 height="390"
                 border
-                style="width: 950px; text-align: center"
+                style="width: 955px; text-align: center"
                 v-loading="loading"
                 element-loading-text="In processing, please wait with patience"
                 element-loading-spinner="el-icon-loading"
